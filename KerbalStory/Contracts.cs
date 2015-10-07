@@ -87,6 +87,12 @@
 			return this.chapter.Synopsis;
 		}
 
+		public String Story {
+			get {
+				return this.chapter.Story.Trim();
+			}
+		}
+
 		/// <summary>
 		/// コントラクト完了時のミニウィンドウに表示する文字
 		/// </summary>
@@ -118,8 +124,9 @@
 		/// オファー時のイベント
 		/// </summary>
 		protected override void OnOffered() {
-			var dialog = new StoryDialog();
-			dialog.Message = this.chapter.Story.Trim();
+			var dialog = new StoryDialog() {
+				Message = this.Story,
+			};
 			dialog.OnClick += () => {
 				this.Accept();
 			};

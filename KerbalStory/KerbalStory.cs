@@ -7,13 +7,14 @@
 
 	[KSPAddon(KSPAddon.Startup.SpaceCentre, false)]
 	public class KerbalStory : MonoBehaviour {
-		private ApplicationLauncherButton button;
+		private ApplicationLauncherButton luncherButton;
+		private StoryDialog dialog = new StoryDialog();
 
 		private IList<String> chapterIds;
 
 		private void Awake() {
 			var texture = GameDatabase.Instance.GetTexture("KerbalStory/book", false);
-			this.button = ApplicationLauncher.Instance.AddModApplication(ButtonClick, ButtonClick, null, null, null, null,
+			this.luncherButton = ApplicationLauncher.Instance.AddModApplication(LuncherButtonOn, LuncherButtonOff, null, null, null, null,
 				ApplicationLauncher.AppScenes.ALWAYS, texture);
 
 			var nodes = GameDatabase.Instance.GetConfigNodes("CHAPTER");
@@ -23,16 +24,30 @@
 		}
 
 		internal void OnDestroy() {
-			if (button != null) {
-				ApplicationLauncher.Instance.RemoveModApplication(button);
-				button = null;
+			if (luncherButton != null) {
+				ApplicationLauncher.Instance.RemoveModApplication(luncherButton);
+				luncherButton = null;
 			}
 
 			GameEvents.Contract.onContractsLoaded.Remove(OnContractsLoaded);
 		}
 
-		private void ButtonClick() {
+		private void LuncherButtonOn() {
+			var contract = ContractSystem.Instance.Contracts.FirstOrDefault(c => c is StoryContract) as StoryContract;
+			if (contract == null) {
+				luncherButton.SetFalse();
+				return;
+			}
 
+			this.dialog.Message = contract.Story;
+			this.dialog.OnClick += () => {
+				luncherButton.SetFalse();
+			};
+			this.dialog.Show();
+		}
+
+		private void LuncherButtonOff() {
+			this.dialog.Hide();
 		}
 
 		private void OnContractsLoaded() {
