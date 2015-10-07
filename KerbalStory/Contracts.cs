@@ -1,10 +1,8 @@
 ﻿namespace KerbalStory {
 	using Contracts;
-	using FinePrint.Contracts.Parameters;
-	using FinePrint.Utilities;
+	using Contracts.Agents;
 	using System;
 	using System.Linq;
-	using UnityEngine;
 
 	public class StoryContract : Contract {
 		public static readonly Int32 StoryMissionId = Int32.MaxValue;
@@ -31,7 +29,7 @@
 			this.expiryType = DeadlineType.None;
 			this.deadlineType = DeadlineType.None;
 
-			this.agent = new Contracts.Agents.Agent("Kerbin government", "Squad/Agencies/KerbinWorldFirstRecordKeepingSociety", "Squad/Agencies/KerbinWorldFirstRecordKeepingSociety_scaled");
+			this.agent = AgentList.Instance.GetAgent("Kerbin government");
 			return true;
 		}
 
@@ -92,16 +90,12 @@
 		}
 
 		protected override void OnLoad(ConfigNode node) {
-			Debug.Log("CONTRACT==LOAD");
-
 			var chapterId = node.GetValue("chapterId");
 			this.chapter = GameDatabase.Instance.GetConfigNodes("CHAPTER").Select(n => new Chapter(n)).First(n => n.Id == chapterId);
-			Debug.Log(this.chapter != null);
 			base.OnLoad(node);
 		}
 
 		protected override void OnSave(ConfigNode node) {
-			Debug.Log("CONTRACT==SAVE");
 			node.AddValue("chapterId", this.chapter.Id);
 			base.OnSave(node);
 		}
@@ -131,11 +125,6 @@
 		/// </summary>
 		protected override void OnCompleted() {
 
-		}
-
-		protected override void OnParameterStateChange(ContractParameter p) {
-			Debug.Log("OnParameterStateChange");
-			base.OnParameterStateChange(p);
 		}
 	}
 }

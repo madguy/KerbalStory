@@ -61,7 +61,6 @@
     <Content Include="Chapters\story.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include=".gitignore" />
     <None Include="Chapter.cfg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

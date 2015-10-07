@@ -23,9 +23,5 @@
 			this.chapter = this.chapter ?? "Chapter1";
 			this.state = this.state ?? StoryState.Introduction.ToString();
 		}
-
-		public override void OnSave(ConfigNode node) {
-
-		}
 	}
 }
