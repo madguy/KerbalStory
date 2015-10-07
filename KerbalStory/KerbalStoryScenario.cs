@@ -2,7 +2,7 @@
 	using System;
 	using UnityEngine;
 
-	[KSPScenario(ScenarioCreationOptions.AddToExistingCareerGames | ScenarioCreationOptions.AddToNewCareerGames, GameScenes.SPACECENTER, GameScenes.FLIGHT)]
+	[KSPScenario(ScenarioCreationOptions.AddToExistingCareerGames, GameScenes.SPACECENTER, GameScenes.FLIGHT)]
 	public class KerbalStoryScenario : ScenarioModule {
 		[KSPField(isPersistant = true)]
 		public String chapter;
@@ -17,11 +17,6 @@
 			set {
 				this.state = value.ToString();
 			}
-		}
-
-		public override void OnLoad(ConfigNode node) {
-			this.chapter = this.chapter ?? "Chapter1";
-			this.state = this.state ?? StoryState.Introduction.ToString();
 		}
 	}
 }

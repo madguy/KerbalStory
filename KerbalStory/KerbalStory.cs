@@ -12,7 +12,14 @@
 
 		private IList<String> chapterIds;
 
+		/// <summary>
+		/// シーン切り替え時の生成イベント
+		/// </summary>
 		private void Awake() {
+			if (Util.IsModEnabled == false) {
+				return;
+			}
+
 			var texture = GameDatabase.Instance.GetTexture("KerbalStory/book", false);
 			this.luncherButton = ApplicationLauncher.Instance.AddModApplication(LuncherButtonOn, LuncherButtonOff, null, null, null, null,
 				ApplicationLauncher.AppScenes.ALWAYS, texture);
@@ -23,7 +30,14 @@
 			GameEvents.Contract.onContractsLoaded.Add(OnContractsLoaded);
 		}
 
+		/// <summary>
+		/// シーン切り替え時の破棄イベント
+		/// </summary>
 		internal void OnDestroy() {
+			if (Util.IsModEnabled == false) {
+				return;
+			}
+
 			if (luncherButton != null) {
 				ApplicationLauncher.Instance.RemoveModApplication(luncherButton);
 				luncherButton = null;
@@ -99,10 +113,18 @@
 	[KSPAddon(KSPAddon.Startup.Flight, false)]
 	public class KerbalStoryFlight : MonoBehaviour {
 		private void Awake() {
+			if (Util.IsModEnabled == false) {
+				return;
+			}
+
 			GameEvents.Contract.onCompleted.Add(OnContractComplete);
 		}
 
 		internal void OnDestroy() {
+			if (Util.IsModEnabled == false) {
+				return;
+			}
+
 			GameEvents.Contract.onCompleted.Remove(OnContractComplete);
 		}
 
@@ -126,5 +148,15 @@
 
 	public enum StoryState {
 		Introduction, Active, Completed,
+	}
+
+	internal static class Util {
+		public static Boolean IsModEnabled {
+			get {
+				var isEnabled = HighLogic.CurrentGame.scenarios.Any(psm => psm.moduleName == typeof(KerbalStoryScenario).Name);
+				Debug.Log(String.Format("== Mod is {0} ==", isEnabled));
+				return isEnabled;
+			}
+		}
 	}
 }
