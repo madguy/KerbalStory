@@ -1,7 +1,5 @@
 ﻿namespace KerbalStory {
 	using Contracts;
-	using FinePrint.Contracts.Parameters;
-	using FinePrint.Utilities;
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
@@ -65,7 +63,13 @@
 			this.AdvanceFunds = Int32.Parse(funds[0]);
 			this.CompletionFunds = Int32.Parse(funds[1]);
 
-			this.ContractParameters = configNode.GetNodes("PARAM").Select(o => this.ParseObjective(o)).ToList();
+			this.ContractParameters = configNode.GetNodes("PARAM").Select(node => {
+				var paramName = node.GetValue("name");
+				var parameterType = ContractSystem.GetParameterType(paramName);
+				var contractParameter = (ContractParameter)Activator.CreateInstance(parameterType);
+				contractParameter.Load(node);
+				return contractParameter;
+			}).ToList();
 		}
 
 		public override Boolean Equals(Object obj) {
@@ -75,27 +79,6 @@
 
 		public override Int32 GetHashCode() {
 			return this.Id.GetHashCode();
-		}
-
-		private ContractParameter ParseObjective(ConfigNode node) {
-			switch (node.GetValue("name")) {
-				case "RecordTrackingParameter":
-					return new RecordTrackingParameter(node.GetValue("trackType").ToEnum<RecordTrackType>(), Double.Parse(node.GetValue("trackValue")));
-				case "ProbeSystemsParameter":
-					return new ProbeSystemsParameter();
-				case "satellite":
-					var seed = Environment.TickCount;
-					var random = new Random(seed);
-					var targetBody = FlightGlobals.Bodies.First(body => body.name == node.GetValue("target"));
-					var altitudeFactor = 0.5;
-					var inclinationFactor = 0.5;
-					var eccentricity = random.NextDouble() * (altitudeFactor / 2.0);
-					var deviationWindow = 10.0;
-					var orbit = CelestialUtilities.GenerateOrbit(OrbitType.STATIONARY, seed, targetBody, altitudeFactor, inclinationFactor, eccentricity);
-					return new SpecificOrbitParameter(OrbitType.STATIONARY, orbit.inclination, orbit.eccentricity, orbit.semiMinorAxis, orbit.LAN, orbit.argumentOfPeriapsis, orbit.meanAnomaly, orbit.epoch, targetBody, deviationWindow);
-				default:
-					return null;
-			}
 		}
 	}
 }

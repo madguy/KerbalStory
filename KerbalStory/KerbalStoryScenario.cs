@@ -1,6 +1,5 @@
 ﻿namespace KerbalStory {
 	using System;
-	using UnityEngine;
 
 	[KSPScenario(ScenarioCreationOptions.AddToExistingCareerGames, GameScenes.SPACECENTER, GameScenes.FLIGHT)]
 	public class KerbalStoryScenario : ScenarioModule {
