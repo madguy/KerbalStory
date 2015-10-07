@@ -9,8 +9,13 @@
 
 		private Chapter chapter;
 
-		public static Contract Generate(Chapter chapter) {
-			var contract = (StoryContract)Contract.Generate(typeof(StoryContract), Contract.ContractPrestige.Trivial, StoryContract.StoryMissionId, Contract.State.Generated);
+		public static Contract Generate(String chapterId) {
+			var contract = Contract.Generate(typeof(StoryContract), Contract.ContractPrestige.Trivial, StoryContract.StoryMissionId, Contract.State.Generated) as StoryContract;
+			if (contract == null) {
+				return null;
+			}
+
+			var chapter = GameDatabase.Instance.GetConfigNodes("CHAPTER").Select(n => new Chapter(n)).First(n => n.Id == chapterId);
 			contract.chapter = chapter;
 			contract.SetScience(chapter.Science);
 			contract.SetReputation(chapter.Reputation);
@@ -20,6 +25,7 @@
 				contract.AddParameter(param);
 			}
 			contract.Offer();
+
 			return contract;
 		}
 
@@ -50,11 +56,11 @@
 		}
 
 		/// <summary>
-		/// コントラクト独自のHashCode
+		/// コントラクト独自のHashString
 		/// </summary>
 		/// <returns></returns>
 		protected override String GetHashString() {
-			return "StoryContract";
+			return this.MissionSeed.ToString() + this.DateAccepted.ToString();
 		}
 
 		/// <summary>

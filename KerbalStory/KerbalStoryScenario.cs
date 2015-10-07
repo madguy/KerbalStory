@@ -2,7 +2,7 @@
 	using System;
 	using UnityEngine;
 
-	[KSPScenario(ScenarioCreationOptions.AddToExistingCareerGames | ScenarioCreationOptions.AddToNewCareerGames, GameScenes.SPACECENTER)]
+	[KSPScenario(ScenarioCreationOptions.AddToExistingCareerGames | ScenarioCreationOptions.AddToNewCareerGames, GameScenes.SPACECENTER, GameScenes.FLIGHT)]
 	public class KerbalStoryScenario : ScenarioModule {
 		[KSPField(isPersistant = true)]
 		public String chapter;
