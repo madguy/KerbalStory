@@ -1,55 +1,31 @@
-﻿namespace KerbalAdventure {
+﻿namespace KerbalStory {
 	using System;
-	using System.Collections.Generic;
 	using UnityEngine;
-	using System.IO;
-	using System.Linq;
-	using System.Reflection;
-	using System.ComponentModel;
 
+	[KSPScenario(ScenarioCreationOptions.AddToExistingCareerGames | ScenarioCreationOptions.AddToNewCareerGames, GameScenes.SPACECENTER)]
 	public class KerbalStoryScenario : ScenarioModule {
-		private static readonly String NODE_NAME = "KERBAL_STORY_SETTINGS";
+		[KSPField(isPersistant = true)]
+		public String chapter;
 
-		private ConfigNode settingsNode = null;
+		[KSPField(isPersistant = true)]
+		private String state;
 
-		public KerbalStoryScenario() {
+		public StoryState State {
+			get {
+				return this.state.ToEnum<StoryState>();
+			}
+			set {
+				this.state = value.ToString();
+			}
 		}
 
 		public override void OnLoad(ConfigNode node) {
-			base.OnLoad(node);
-
-			Debug.Log("OnLoad");
-
-			if (node.HasNode(NODE_NAME)) {
-				settingsNode = node.GetNode(NODE_NAME);
-			}
+			this.chapter = this.chapter ?? "Chapter1";
+			this.state = this.state ?? StoryState.Introduction.ToString();
 		}
 
 		public override void OnSave(ConfigNode node) {
-			base.OnSave(node);
 
-			Debug.Log("OnSave");
-
-			if (node.HasNode(NODE_NAME)) {
-				settingsNode = node.GetNode(NODE_NAME);
-			} else {
-				settingsNode = node.AddNode(NODE_NAME);
-			}
-		}
-	}
-
-	internal static class ConfigNodeExtend {
-		public static T TryGetValue<T>(this ConfigNode config, String key, T defaultValue) where T : struct {
-			var converter = TypeDescriptor.GetConverter(typeof(T));
-			if (converter == null) {
-				return defaultValue;
-			}
-
-			if (String.IsNullOrEmpty(key)) {
-				return defaultValue;
-			}
-
-			return (T)converter.ConvertFromString(config.GetValue(key));
 		}
 	}
 }

@@ -1,4 +1,4 @@
-﻿namespace KerbalAdventure {
+﻿namespace KerbalStory {
 	using System;
 	using UnityEngine;
 
@@ -58,7 +58,7 @@
 		}
 
 		private void OnDraw() {
-			this.windowPosition = GUILayout.Window(11, windowPosition, OnWindow, "Kerbal Adventure", windowStyle);
+			this.windowPosition = GUILayout.Window(11, windowPosition, OnWindow, "Kerbal Story", windowStyle);
 		}
 
 		private void OnWindow(Int32 windowId) {

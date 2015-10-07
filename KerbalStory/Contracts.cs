@@ -1,8 +1,9 @@
-﻿namespace KerbalAdventure {
+﻿namespace KerbalStory {
 	using Contracts;
 	using FinePrint.Contracts.Parameters;
 	using FinePrint.Utilities;
 	using System;
+	using System.Linq;
 	using UnityEngine;
 
 	public class StoryContract : Contract {
@@ -10,11 +11,17 @@
 
 		private Chapter chapter;
 
-		internal static Contract Generate(Chapter chapter) {
+		public static Contract Generate(Chapter chapter) {
 			var contract = (StoryContract)Contract.Generate(typeof(StoryContract), Contract.ContractPrestige.Trivial, StoryContract.StoryMissionId, Contract.State.Generated);
-			contract.SetChapter(chapter);
+			contract.chapter = chapter;
+			contract.SetScience(chapter.Science);
+			contract.SetReputation(chapter.Reputation);
+			contract.SetFunds(chapter.AdvanceFunds, chapter.CompletionFunds);
+
+			foreach (ContractParameter param in chapter.ContractParameters) {
+				contract.AddParameter(param);
+			}
 			contract.Offer();
-			ContractSystem.Instance.Contracts.Add(contract);
 			return contract;
 		}
 
@@ -25,20 +32,7 @@
 			this.deadlineType = DeadlineType.None;
 
 			this.agent = new Contracts.Agents.Agent("Kerbin government", "Squad/Agencies/KerbinWorldFirstRecordKeepingSociety", "Squad/Agencies/KerbinWorldFirstRecordKeepingSociety_scaled");
-
 			return true;
-		}
-
-		private void SetChapter(Chapter chapter) {
-			this.chapter = chapter;
-
-			this.SetScience(this.chapter.Science);
-			this.SetReputation(this.chapter.Reputation);
-			this.SetFunds(this.chapter.AdvanceFunds, this.chapter.CompletionFunds);
-
-			foreach (ContractParameter param in this.chapter.ContractParameters) {
-				this.AddParameter(param);
-			}
 		}
 
 		/// <summary>
@@ -62,7 +56,7 @@
 		/// </summary>
 		/// <returns></returns>
 		protected override String GetHashString() {
-			return String.Format("StoryContract {0}", this.chapter.Id);
+			return "StoryContract";
 		}
 
 		/// <summary>
@@ -98,10 +92,17 @@
 		}
 
 		protected override void OnLoad(ConfigNode node) {
+			Debug.Log("CONTRACT==LOAD");
+
+			var chapterId = node.GetValue("chapterId");
+			this.chapter = GameDatabase.Instance.GetConfigNodes("CHAPTER").Select(n => new Chapter(n)).First(n => n.Id == chapterId);
+			Debug.Log(this.chapter != null);
 			base.OnLoad(node);
 		}
 
 		protected override void OnSave(ConfigNode node) {
+			Debug.Log("CONTRACT==SAVE");
+			node.AddValue("chapterId", this.chapter.Id);
 			base.OnSave(node);
 		}
 
@@ -118,7 +119,7 @@
 		/// </summary>
 		protected override void OnOffered() {
 			var dialog = new StoryDialog();
-			dialog.Message = "test";
+			dialog.Message = this.chapter.Story.Trim();
 			dialog.OnClick += () => {
 				this.Accept();
 			};
