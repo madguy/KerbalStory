@@ -36,6 +36,7 @@
 		private GUIStyle windowStyle;
 		private GUIStyle labelStyle = new GUIStyle(HighLogic.Skin.label);
 		private GUIStyle scrollStyle = new GUIStyle(HighLogic.Skin.scrollView);
+
 		private Vector2 scrollPos = Vector2.zero;
 		private Boolean isVisible = false;
 
