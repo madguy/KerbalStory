@@ -14,16 +14,6 @@
 		public String Title { get; private set; }
 
 		/// <summary>
-		/// コントラクトあらすじ
-		/// </summary>
-		public String Synopsis { get; private set; }
-
-		/// <summary>
-		/// コントラクト詳細
-		/// </summary>
-		public String Description { get; private set; }
-
-		/// <summary>
 		/// ストーリーメッセージ
 		/// </summary>
 		public String Story { get; private set; }
@@ -48,20 +38,30 @@
 		/// </summary>
 		public Int32 CompletionFunds { get; private set; }
 
+		/// <summary>
+		/// 失敗報酬
+		/// </summary>
+		public Int32 FailureFunds { get; private set; }
+
+		/// <summary>
+		/// 難易度
+		/// </summary>
+		public Contract.ContractPrestige Difficulty { get; private set; }
+
 		public IList<ContractParameter> ContractParameters { get; private set; }
 
 		public Chapter(ConfigNode configNode) {
 			this.Id = configNode.GetValue("id");
 			this.Title = configNode.GetValue("title");
-			this.Description = configNode.GetValue("description");
-			this.Synopsis = configNode.GetValue("synopsis");
 			this.Story = configNode.GetValue("story").Replace("\\n", "\n");
 
+			this.Difficulty = configNode.GetValue("difficulty").ToEnum<Contract.ContractPrestige>();
 			this.Science = Int32.Parse(configNode.GetValue("science"));
 			this.Reputation = Int32.Parse(configNode.GetValue("reputation"));
 			var funds = configNode.GetValue("funds").Split(',');
 			this.AdvanceFunds = Int32.Parse(funds[0]);
 			this.CompletionFunds = Int32.Parse(funds[1]);
+			this.FailureFunds = Int32.Parse(funds[2]);
 
 			this.ContractParameters = configNode.GetNodes("PARAM").Select(node => {
 				var paramName = node.GetValue("name");

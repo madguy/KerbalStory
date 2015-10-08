@@ -17,9 +17,10 @@
 
 			var chapter = GameDatabase.Instance.GetConfigNodes("CHAPTER").Select(n => new Chapter(n)).First(n => n.Id == chapterId);
 			contract.chapter = chapter;
+			contract.prestige = chapter.Difficulty;
 			contract.SetScience(chapter.Science);
 			contract.SetReputation(chapter.Reputation);
-			contract.SetFunds(chapter.AdvanceFunds, chapter.CompletionFunds);
+			contract.SetFunds(chapter.AdvanceFunds, chapter.CompletionFunds, chapter.FailureFunds);
 
 			foreach (ContractParameter param in chapter.ContractParameters) {
 				contract.AddParameter(param);
@@ -69,22 +70,6 @@
 		/// <returns></returns>
 		protected override String GetTitle() {
 			return this.chapter.Title;
-		}
-
-		/// <summary>
-		/// 詳細
-		/// </summary>
-		/// <returns></returns>
-		protected override String GetDescription() {
-			return this.chapter.Description;
-		}
-
-		/// <summary>
-		/// あらすじ
-		/// </summary>
-		/// <returns></returns>
-		protected override String GetSynopsys() {
-			return this.chapter.Synopsis;
 		}
 
 		public String Story {
