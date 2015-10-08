@@ -72,6 +72,12 @@
 			return this.chapter.Title;
 		}
 
+		public String InstractorName {
+			get {
+				return this.chapter.Instructor;
+			}
+		}
+
 		public String Story {
 			get {
 				return this.chapter.Story.Trim();

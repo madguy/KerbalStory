@@ -60,7 +60,7 @@
     <Content Include="book.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Chapters\story.txt" />
+    <Content Include="story.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Chapter.cfg">

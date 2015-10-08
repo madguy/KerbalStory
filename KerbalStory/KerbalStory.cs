@@ -53,6 +53,7 @@
 				return;
 			}
 
+			this.dialog.InstructorName = contract.InstractorName;
 			this.dialog.Message = contract.Story;
 			this.dialog.OnClick += () => {
 				luncherButton.SetFalse();
