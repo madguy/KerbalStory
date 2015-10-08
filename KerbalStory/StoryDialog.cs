@@ -34,8 +34,8 @@
 
 		private Rect windowPosition = new Rect(300f, 150f, 600f, 500f);
 		private GUIStyle windowStyle;
-		private GUIStyle labelStyle = new GUIStyle(HighLogic.Skin.label);
-		private GUIStyle scrollStyle = new GUIStyle(HighLogic.Skin.scrollView);
+		private GUIStyle labelStyle;
+		private GUIStyle scrollStyle;
 
 		private Vector2 scrollPos = Vector2.zero;
 		private Boolean isVisible = false;
@@ -46,6 +46,12 @@
 				fixedWidth = 400f,
 				fixedHeight = 600f,
 			};
+
+			this.labelStyle = new GUIStyle(HighLogic.Skin.label) {
+				alignment = TextAnchor.MiddleCenter,
+			};
+
+			this.scrollStyle = new GUIStyle(HighLogic.Skin.scrollView);
 
 			this.Instructor = Instructors.Wernher;
 		}
