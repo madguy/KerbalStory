@@ -110,6 +110,7 @@
 		/// </summary>
 		protected override void OnOffered() {
 			var dialog = new StoryDialog() {
+				InstructorName = this.chapter.Instructor,
 				Message = this.Story,
 			};
 			dialog.OnClick += () => {

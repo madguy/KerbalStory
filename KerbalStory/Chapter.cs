@@ -14,6 +14,11 @@
 		public String Title { get; private set; }
 
 		/// <summary>
+		/// インストラクター
+		/// </summary>
+		public String Instructor { get; private set; }
+
+		/// <summary>
 		/// ストーリーメッセージ
 		/// </summary>
 		public String Story { get; private set; }
@@ -52,6 +57,8 @@
 
 		public Chapter(ConfigNode configNode) {
 			this.Id = configNode.GetValue("id");
+
+			this.Instructor = configNode.GetValue("instructor");
 			this.Title = configNode.GetValue("title");
 			this.Story = configNode.GetValue("story").Replace("\\n", "\n");
 
