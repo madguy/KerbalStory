@@ -20,6 +20,7 @@
 				this.instructor = value;
 				this.instructorTexture = new RenderTexture(this.instructorPortraitSize, this.instructorPortraitSize, 8);
 				this.instructor.instructorCamera.targetTexture = this.instructorTexture;
+				this.instructor.instructorCamera.ResetAspect();
 			}
 		}
 
@@ -41,18 +42,14 @@
 		private Boolean isVisible = false;
 
 		public StoryDialog() {
-			var hoge = new GUILayoutOption[0];
 			this.windowStyle = new GUIStyle() {
 				fixedWidth = 400f,
 				fixedHeight = 600f,
 			};
-
 			this.labelStyle = new GUIStyle(HighLogic.Skin.label) {
 				alignment = TextAnchor.MiddleCenter,
 			};
-
 			this.scrollStyle = new GUIStyle(HighLogic.Skin.scrollView);
-
 			this.Instructor = Instructors.Wernher;
 		}
 
@@ -77,10 +74,10 @@
 		}
 
 		private void OnDraw() {
-			this.windowPosition = KSPUtil.ClampRectToScreen(GUILayout.Window(WINDOW_ID, this.windowPosition, this.OnWindow, this.Title));
+			this.windowPosition = KSPUtil.ClampRectToScreen(GUILayout.Window(WINDOW_ID, this.windowPosition, this.OnWindowDraw, this.Title));
 		}
 
-		private void OnWindow(Int32 windowId) {
+		private void OnWindowDraw(Int32 windowId) {
 			var charaRectSize = this.instructorPortraitSize;
 			GUILayout.BeginHorizontal();
 			{

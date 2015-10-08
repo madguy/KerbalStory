@@ -4,10 +4,10 @@
 	using System;
 	using System.Linq;
 
-	public class StoryContract : Contract {
+	public sealed class StoryContract : Contract {
 		public static readonly Int32 StoryMissionId = Int32.MaxValue;
 
-		private Chapter chapter;
+		internal Chapter Chapter { get; private set; }
 
 		public static Contract Generate(String chapterId) {
 			var contract = Contract.Generate(typeof(StoryContract), Contract.ContractPrestige.Trivial, StoryContract.StoryMissionId, Contract.State.Generated) as StoryContract;
@@ -15,8 +15,8 @@
 				return null;
 			}
 
-			var chapter = GameDatabase.Instance.GetConfigNodes("CHAPTER").Select(n => new Chapter(n)).First(n => n.Id == chapterId);
-			contract.chapter = chapter;
+			var chapter = Chapter.GetInstance(chapterId);
+			contract.Chapter = chapter;
 			contract.prestige = chapter.Difficulty;
 			contract.SetScience(chapter.Science);
 			contract.SetReputation(chapter.Reputation);
@@ -69,19 +69,7 @@
 		/// </summary>
 		/// <returns></returns>
 		protected override String GetTitle() {
-			return this.chapter.Title;
-		}
-
-		public String InstractorName {
-			get {
-				return this.chapter.Instructor;
-			}
-		}
-
-		public String Story {
-			get {
-				return this.chapter.Story.Trim();
-			}
+			return this.Chapter.Title;
 		}
 
 		/// <summary>
@@ -89,17 +77,17 @@
 		/// </summary>
 		/// <returns></returns>
 		protected override String MessageCompleted() {
-			return String.Format("{0} is finished", this.chapter.Id);
+			return String.Format("{0} is finished", this.Chapter.Id);
 		}
 
 		protected override void OnLoad(ConfigNode node) {
 			var chapterId = node.GetValue("chapterId");
-			this.chapter = GameDatabase.Instance.GetConfigNodes("CHAPTER").Select(n => new Chapter(n)).First(n => n.Id == chapterId);
+			this.Chapter = Chapter.GetInstance(chapterId);
 			base.OnLoad(node);
 		}
 
 		protected override void OnSave(ConfigNode node) {
-			node.AddValue("chapterId", this.chapter.Id);
+			node.AddValue("chapterId", this.Chapter.Id);
 			base.OnSave(node);
 		}
 
@@ -115,10 +103,7 @@
 		/// オファー時のイベント
 		/// </summary>
 		protected override void OnOffered() {
-			var dialog = new StoryDialog() {
-				InstructorName = this.chapter.Instructor,
-				Message = this.Story,
-			};
+			var dialog = this.Chapter.CreateDialog();
 			dialog.OnClick += () => {
 				this.Accept();
 			};

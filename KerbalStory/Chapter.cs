@@ -4,8 +4,19 @@
 	using System.Collections.Generic;
 	using System.Linq;
 
-	public class Chapter {
+	internal sealed class Chapter {
+		public static Chapter GetInstance(String chapterId) {
+			var configNode = GameDatabase.Instance.GetConfigNodes("CHAPTER").FirstOrDefault(n => n.GetValue("id") == chapterId);
+			if (configNode == null) {
+				return null;
+			}
 
+			return new Chapter(configNode);
+		}
+
+		/// <summary>
+		/// チャプターID
+		/// </summary>
 		public String Id { get; private set; }
 
 		/// <summary>
@@ -86,6 +97,13 @@
 
 		public override Int32 GetHashCode() {
 			return this.Id.GetHashCode();
+		}
+
+		public StoryDialog CreateDialog() {
+			return new StoryDialog() {
+				InstructorName = this.Instructor,
+				Message = this.Story,
+			};
 		}
 	}
 }

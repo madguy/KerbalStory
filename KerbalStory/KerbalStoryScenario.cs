@@ -2,7 +2,7 @@
 	using System;
 
 	[KSPScenario(ScenarioCreationOptions.AddToExistingCareerGames, GameScenes.SPACECENTER, GameScenes.FLIGHT)]
-	public class KerbalStoryScenario : ScenarioModule {
+	public sealed class KerbalStoryScenario : ScenarioModule {
 		[KSPField(isPersistant = true)]
 		public String chapter;
 

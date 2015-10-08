@@ -6,9 +6,8 @@
 	using UnityEngine;
 
 	[KSPAddon(KSPAddon.Startup.SpaceCentre, false)]
-	public class KerbalStory : MonoBehaviour {
+	public sealed class KerbalStory : MonoBehaviour {
 		private ApplicationLauncherButton luncherButton;
-		private StoryDialog dialog = new StoryDialog();
 
 		private IList<String> chapterIds;
 
@@ -47,22 +46,21 @@
 		}
 
 		private void LuncherButtonOn() {
-			var contract = ContractSystem.Instance.Contracts.FirstOrDefault(c => c is StoryContract) as StoryContract;
-			if (contract == null) {
+			var currentContract = ContractSystem.Instance.Contracts.FirstOrDefault(c => c is StoryContract) as StoryContract;
+			if (currentContract == null) {
 				luncherButton.SetFalse();
 				return;
 			}
 
-			this.dialog.InstructorName = contract.InstractorName;
-			this.dialog.Message = contract.Story;
-			this.dialog.OnClick += () => {
+			var chapter = Chapter.GetInstance(currentContract.Chapter.Id);
+			var dialog = chapter.CreateDialog();
+			dialog.OnClick += () => {
 				luncherButton.SetFalse();
 			};
-			this.dialog.Show();
+			dialog.Show();
 		}
 
 		private void LuncherButtonOff() {
-			this.dialog.Hide();
 		}
 
 		private void OnContractsLoaded() {
@@ -149,15 +147,5 @@
 
 	public enum StoryState {
 		Introduction, Active, Completed,
-	}
-
-	internal static class Util {
-		public static Boolean IsModEnabled {
-			get {
-				var isEnabled = HighLogic.CurrentGame.scenarios.Any(psm => psm.moduleName == typeof(KerbalStoryScenario).Name);
-				Debug.Log(String.Format("== Mod is {0} ==", isEnabled));
-				return isEnabled;
-			}
-		}
 	}
 }
