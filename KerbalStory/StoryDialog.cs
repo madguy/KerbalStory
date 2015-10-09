@@ -18,6 +18,10 @@
 			}
 			set {
 				this.instructor = value;
+				if (value == null) {
+					return;
+				}
+
 				this.instructorTexture = new RenderTexture(this.instructorPortraitSize, this.instructorPortraitSize, 8);
 				this.instructor.instructorCamera.targetTexture = this.instructorTexture;
 				this.instructor.instructorCamera.ResetAspect();
@@ -51,6 +55,13 @@
 			};
 			this.scrollStyle = new GUIStyle(HighLogic.Skin.scrollView);
 			this.Instructor = Instructors.Wernher;
+		}
+
+		~StoryDialog() {
+			this.windowStyle = null;
+			this.labelStyle = null;
+			this.scrollStyle = null;
+			this.instructor = null;
 		}
 
 		public void Show() {
