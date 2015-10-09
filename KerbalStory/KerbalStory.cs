@@ -27,6 +27,7 @@
 			this.chapterIds = nodes.Select(node => node.GetValue("id")).ToList();
 
 			GameEvents.Contract.onContractsLoaded.Add(OnContractsLoaded);
+			GameEvents.Contract.onCompleted.Add(OnContractComplete);
 		}
 
 		/// <summary>
@@ -43,6 +44,7 @@
 			}
 
 			GameEvents.Contract.onContractsLoaded.Remove(OnContractsLoaded);
+			GameEvents.Contract.onCompleted.Remove(OnContractComplete);
 		}
 
 		private void LuncherButtonOn() {
@@ -61,6 +63,7 @@
 		}
 
 		private void LuncherButtonOff() {
+
 		}
 
 		private void OnContractsLoaded() {
@@ -69,7 +72,7 @@
 		}
 
 		private void ChapterChange() {
-			var scenario = this.GetScenario(HighLogic.CurrentGame);
+			var scenario = Util.GetScenario();
 			if (scenario == null || scenario.State != StoryState.Completed) {
 				return;
 			}
@@ -84,7 +87,7 @@
 		}
 
 		private void ActivateContract() {
-			var scenario = this.GetScenario(HighLogic.CurrentGame);
+			var scenario = Util.GetScenario();
 			if (scenario == null || scenario.State != StoryState.Introduction) {
 				return;
 			}
@@ -99,13 +102,16 @@
 			scenario.State = StoryState.Active;
 		}
 
-		private KerbalStoryScenario GetScenario(Game game) {
-			var protoScenario = game.scenarios.FirstOrDefault(s => s.moduleRef is KerbalStoryScenario);
-			if (protoScenario == null) {
-				return null;
+		private void OnContractComplete(Contract contract) {
+			if ((contract is StoryContract) == false) {
+				return;
+			}
+			var scenario = Util.GetScenario();
+			if (scenario == null) {
+				return;
 			}
 
-			return protoScenario.moduleRef as KerbalStoryScenario;
+			scenario.State = StoryState.Completed;
 		}
 	}
 
@@ -131,17 +137,12 @@
 			if ((contract is StoryContract) == false) {
 				return;
 			}
-			var scenario = this.GetScenario(HighLogic.CurrentGame);
-			scenario.State = StoryState.Completed;
-		}
-
-		private KerbalStoryScenario GetScenario(Game game) {
-			var protoScenario = game.scenarios.FirstOrDefault(s => s.moduleRef is KerbalStoryScenario);
-			if (protoScenario == null) {
-				return null;
+			var scenario = Util.GetScenario();
+			if (scenario == null) {
+				return;
 			}
 
-			return protoScenario.moduleRef as KerbalStoryScenario;
+			scenario.State = StoryState.Completed;
 		}
 	}
 
