@@ -1,6 +1,7 @@
 ﻿namespace KerbalStory {
 	using Contracts;
 	using System;
+	using System.Collections;
 	using System.Collections.Generic;
 	using System.Linq;
 	using UnityEngine;
@@ -12,11 +13,22 @@
 		private IList<String> chapterIds;
 
 		/// <summary>
-		/// シーン切り替え時の生成イベント
+		/// Startのオーバーライド
 		/// </summary>
-		private void Awake() {
-			if (Util.IsModEnabled == false) {
-				return;
+		private void Start() {
+			StartCoroutine(this.SceneInitialize());
+		}
+
+		/// <summary>
+		/// シーンを初期化します。
+		/// </summary>
+		/// <returns></returns>
+		private IEnumerator SceneInitialize() {
+			yield return StartCoroutine(this.WaitScenarioInitialize());
+
+			var scenario = KerbalStoryScenario.Instance;
+			if (scenario == null) {
+				yield break;
 			}
 
 			var texture = GameDatabase.Instance.GetTexture("KerbalStory/book", false);
@@ -26,27 +38,118 @@
 			var nodes = GameDatabase.Instance.GetConfigNodes("CHAPTER");
 			this.chapterIds = nodes.Select(node => node.GetValue("id")).ToList();
 
-			GameEvents.Contract.onContractsLoaded.Add(OnContractsLoaded);
-			GameEvents.Contract.onCompleted.Add(OnContractComplete);
+			GameEvents.Contract.onCompleted.Add(this.OnContractComplete);
+
+			yield return StartCoroutine(this.ModInitialize(scenario));
+			if (scenario.Enabled == false) {
+				yield break;
+			}
+
+			this.MoveToNextChapter(scenario);
+			this.ActivateChapter(scenario);
+		}
+
+		/// <summary>
+		/// シナリオ初期化を待機します。
+		/// </summary>
+		/// <returns></returns>
+		private IEnumerator WaitScenarioInitialize() {
+			while (true) {
+				if (KerbalStoryScenario.Instance != null) {
+					break;
+				}
+				yield return 0;
+			}
+		}
+
+		/// <summary>
+		/// Modを初期化します。
+		/// </summary>
+		/// <returns></returns>
+		private IEnumerator ModInitialize(KerbalStoryScenario scenario) {
+			if (scenario.Initialized == true) {
+				yield break;
+			}
+
+			// ダイアログを表示
+			var dialog = new ConfirmDialog("KerbalStoryを有効にしますか？");
+			dialog.OnConfirm += () => {
+				scenario.Initialized = true;
+				scenario.Enabled = true;
+				scenario.Chapter = this.chapterIds[0];
+				scenario.State = StoryState.Introduction;
+
+				var funding = Funding.Instance;
+				funding.AddFunds((-1 * funding.Funds), TransactionReasons.None);
+			};
+			dialog.OnCancel += () => {
+				scenario.Initialized = true;
+				scenario.Enabled = false;
+			};
+			dialog.Show();
+
+			while (true) {
+				if (scenario.Initialized == true) {
+					break;
+				}
+				yield return 0;
+			}
+		}
+
+		/// <summary>
+		/// チャプタークリア済みの場合に次のチャプターに移動させます。
+		/// </summary>
+		private void MoveToNextChapter(KerbalStoryScenario scenario) {
+			if (scenario.State != StoryState.Completed) {
+				return;
+			}
+
+			var nextChapterId = this.chapterIds.SkipWhile(id => id != scenario.Chapter).Skip(1).FirstOrDefault();
+			if (nextChapterId == null) {
+				return;
+			}
+
+			scenario.Chapter = nextChapterId;
+			scenario.State = StoryState.Introduction;
+		}
+
+		/// <summary>
+		/// チャプターが開始前の場合に、状態をアクティブに変更します。
+		/// </summary>
+		private void ActivateChapter(KerbalStoryScenario scenario) {
+			if (scenario.State != StoryState.Introduction) {
+				return;
+			}
+
+			var currentChapterId = this.chapterIds.FirstOrDefault(id => id == scenario.Chapter);
+			if (String.IsNullOrEmpty(currentChapterId)) {
+				return;
+			}
+
+			var contract = StoryContract.Generate(currentChapterId);
+			ContractSystem.Instance.Contracts.Add(contract);
+			scenario.State = StoryState.Active;
 		}
 
 		/// <summary>
 		/// シーン切り替え時の破棄イベント
 		/// </summary>
 		internal void OnDestroy() {
-			if (Util.IsModEnabled == false) {
+			if (KerbalStoryScenario.Instance.Enabled == false) {
 				return;
 			}
 
 			if (luncherButton != null) {
-				ApplicationLauncher.Instance.RemoveModApplication(luncherButton);
+				ApplicationLauncher.Instance.RemoveModApplication(this.luncherButton);
 				luncherButton = null;
 			}
 
-			GameEvents.Contract.onContractsLoaded.Remove(OnContractsLoaded);
-			GameEvents.Contract.onCompleted.Remove(OnContractComplete);
+			GameEvents.Contract.onCompleted.Remove(this.OnContractComplete);
 		}
 
+		/// <summary>
+		/// ランチャーボタンON時のイベント
+		/// </summary>
 		private void LuncherButtonOn() {
 			var currentContract = ContractSystem.Instance.Contracts.FirstOrDefault(c => c is StoryContract) as StoryContract;
 			if (currentContract == null) {
@@ -62,51 +165,22 @@
 			dialog.Show();
 		}
 
+		/// <summary>
+		/// ランチャーボタンOFF時のイベント
+		/// </summary>
 		private void LuncherButtonOff() {
 
 		}
 
-		private void OnContractsLoaded() {
-			this.ChapterChange();
-			this.ActivateContract();
-		}
-
-		private void ChapterChange() {
-			var scenario = Util.GetScenario();
-			if (scenario == null || scenario.State != StoryState.Completed) {
-				return;
-			}
-
-			var nextChapterId = this.chapterIds.SkipWhile(id => id != scenario.chapter).Skip(1).FirstOrDefault();
-			if (nextChapterId == null) {
-				return;
-			}
-
-			scenario.chapter = nextChapterId;
-			scenario.State = StoryState.Introduction;
-		}
-
-		private void ActivateContract() {
-			var scenario = Util.GetScenario();
-			if (scenario == null || scenario.State != StoryState.Introduction) {
-				return;
-			}
-
-			var currentChapterId = this.chapterIds.FirstOrDefault(id => id == scenario.chapter);
-			if (String.IsNullOrEmpty(currentChapterId)) {
-				return;
-			}
-
-			var contract = StoryContract.Generate(currentChapterId);
-			ContractSystem.Instance.Contracts.Add(contract);
-			scenario.State = StoryState.Active;
-		}
-
+		/// <summary>
+		/// ストーリーコントラクト完了時のイベント
+		/// </summary>
+		/// <param name="contract"></param>
 		private void OnContractComplete(Contract contract) {
 			if ((contract is StoryContract) == false) {
 				return;
 			}
-			var scenario = Util.GetScenario();
+			var scenario = KerbalStoryScenario.Instance;
 			if (scenario == null) {
 				return;
 			}
@@ -118,35 +192,23 @@
 	[KSPAddon(KSPAddon.Startup.Flight, false)]
 	public class KerbalStoryFlight : MonoBehaviour {
 		private void Awake() {
-			if (Util.IsModEnabled == false) {
-				return;
-			}
-
-			GameEvents.Contract.onCompleted.Add(OnContractComplete);
+			GameEvents.Contract.onCompleted.Add(this.OnContractComplete);
 		}
 
 		internal void OnDestroy() {
-			if (Util.IsModEnabled == false) {
-				return;
-			}
-
-			GameEvents.Contract.onCompleted.Remove(OnContractComplete);
+			GameEvents.Contract.onCompleted.Remove(this.OnContractComplete);
 		}
 
 		private void OnContractComplete(Contract contract) {
 			if ((contract is StoryContract) == false) {
 				return;
 			}
-			var scenario = Util.GetScenario();
+			var scenario = KerbalStoryScenario.Instance;
 			if (scenario == null) {
 				return;
 			}
 
 			scenario.State = StoryState.Completed;
 		}
-	}
-
-	public enum StoryState {
-		Introduction, Active, Completed,
 	}
 }
