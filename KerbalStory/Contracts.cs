@@ -18,6 +18,7 @@
 			var chapter = Chapter.GetInstance(chapterId);
 			contract.Chapter = chapter;
 			contract.prestige = chapter.Difficulty;
+			contract.AutoAccept = true;
 			contract.SetScience(chapter.Science);
 			contract.SetReputation(chapter.Reputation);
 			contract.SetFunds(chapter.AdvanceFunds, chapter.CompletionFunds, chapter.FailureFunds);
