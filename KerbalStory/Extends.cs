@@ -4,6 +4,10 @@
 
 	internal static class Extends {
 		public static T ToEnum<T>(this String value) {
+			if (!typeof(T).IsEnum) {
+				throw new ArgumentException("T must be an enumerated type");
+			}
+
 			if (String.IsNullOrEmpty(value)) {
 				return default(T);
 			}
