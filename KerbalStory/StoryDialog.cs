@@ -37,8 +37,7 @@
 		private Rect instructorRect;
 		private RenderTexture instructorTexture;
 
-		private Rect windowPosition = new Rect(300f, 150f, 600f, 500f);
-		private GUIStyle windowStyle;
+		private Rect windowPosition;
 		private GUIStyle labelStyle;
 		private GUIStyle scrollStyle;
 
@@ -46,10 +45,10 @@
 		private Boolean isVisible = false;
 
 		public StoryDialog() {
-			this.windowStyle = new GUIStyle() {
-				fixedWidth = 400f,
-				fixedHeight = 600f,
-			};
+			var windowWidth = Math.Max(600, Screen.width / 2);
+			var windowHeight = Math.Max(500, Screen.height / 2);
+			this.windowPosition = new Rect((Screen.width / 2) - (windowWidth / 2), (Screen.height / 2) - (windowHeight / 2), windowWidth, windowHeight);
+
 			this.labelStyle = new GUIStyle(HighLogic.Skin.label) {
 				alignment = TextAnchor.MiddleCenter,
 			};
@@ -58,7 +57,6 @@
 		}
 
 		~StoryDialog() {
-			this.windowStyle = null;
 			this.labelStyle = null;
 			this.scrollStyle = null;
 			this.instructor = null;
