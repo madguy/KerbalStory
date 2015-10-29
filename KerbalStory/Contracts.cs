@@ -104,11 +104,9 @@
 		/// オファー時のイベント
 		/// </summary>
 		protected override void OnOffered() {
-			var dialog = this.Chapter.CreateDialog();
-			dialog.OnClick += () => {
+			StoryDialog.ShowDialog(this.Chapter.Instructor, this.Chapter.Story, () => {
 				this.Accept();
-			};
-			dialog.Show();
+			});
 		}
 
 		/// <summary>

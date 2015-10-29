@@ -16,6 +16,7 @@
 		/// Startのオーバーライド
 		/// </summary>
 		private void Start() {
+			GameEvents.Contract.onCompleted.Add(this.OnContractComplete);
 			StartCoroutine(this.SceneInitialize());
 		}
 
@@ -31,19 +32,17 @@
 				yield break;
 			}
 
-			var texture = GameDatabase.Instance.GetTexture("KerbalStory/book", false);
-			this.luncherButton = ApplicationLauncher.Instance.AddModApplication(LuncherButtonOn, LuncherButtonOff, null, null, null, null,
-				ApplicationLauncher.AppScenes.ALWAYS, texture);
-
 			var nodes = GameDatabase.Instance.GetConfigNodes("CHAPTER");
 			this.chapterIds = nodes.Select(node => node.GetValue("id")).ToList();
-
-			GameEvents.Contract.onCompleted.Add(this.OnContractComplete);
 
 			yield return StartCoroutine(this.ModInitialize(scenario));
 			if (scenario.Enabled == false) {
 				yield break;
 			}
+
+			var texture = GameDatabase.Instance.GetTexture("KerbalStory/book", false);
+			this.luncherButton = ApplicationLauncher.Instance.AddModApplication(LuncherButtonOn, LuncherButtonOff, null, null, null, null,
+				ApplicationLauncher.AppScenes.ALWAYS, texture);
 
 			this.MoveToNextChapter(scenario);
 			this.ActivateChapter(scenario);
@@ -72,8 +71,7 @@
 			}
 
 			// ダイアログを表示
-			var dialog = new ConfirmDialog("KerbalStoryを有効にしますか？");
-			dialog.OnConfirm += () => {
+			ConfirmDialog.ShowDialog("KerbalStoryを有効にしますか？", () => {
 				scenario.Initialized = true;
 				scenario.Enabled = true;
 				scenario.Chapter = this.chapterIds[0];
@@ -81,12 +79,10 @@
 
 				var funding = Funding.Instance;
 				funding.AddFunds((-1 * funding.Funds), TransactionReasons.None);
-			};
-			dialog.OnCancel += () => {
+			}, () => {
 				scenario.Initialized = true;
 				scenario.Enabled = false;
-			};
-			dialog.Show();
+			});
 
 			while (true) {
 				if (scenario.Initialized == true) {
@@ -158,11 +154,9 @@
 			}
 
 			var chapter = Chapter.GetInstance(currentContract.Chapter.Id);
-			var dialog = chapter.CreateDialog();
-			dialog.OnClick += () => {
+			StoryDialog.ShowDialog(chapter.Instructor, chapter.Story, () => {
 				luncherButton.SetFalse();
-			};
-			dialog.Show();
+			});
 		}
 
 		/// <summary>

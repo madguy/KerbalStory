@@ -6,21 +6,25 @@
 		public static readonly String LOCK_ID = "4901858818";
 		private static readonly Int32 WINDOW_ID = 714199;
 
-		public String Message { get; private set; }
-
-		public event Action OnConfirm;
-		public event Action OnCancel;
-
 		private String title = "確認";
+		private String message;
+
+		private Action onSuccess;
+		private Action onCancel;
 
 		private Rect windowPosition = new Rect((Screen.width / 2) - 200, (Screen.height / 2) - 50, 400, 100);
 		private GUIStyle windowStyle;
 		private GUIStyle labelStyle;
 
-		private Boolean isVisible = false;
+		public static void ShowDialog(String message, Action onSuccess, Action onCancel) {
+			new ConfirmDialog() {
+				message = message,
+				onSuccess = onSuccess,
+				onCancel = onCancel,
+			};
+		}
 
-		public ConfirmDialog(String message) {
-			this.Message = message;
+		private ConfirmDialog() {
 			this.windowStyle = new GUIStyle(HighLogic.Skin.window);
 			this.labelStyle = new GUIStyle() {
 				normal = new GUIStyleState() {
@@ -28,43 +32,14 @@
 				},
 				alignment = TextAnchor.MiddleCenter,
 			};
-		}
-
-		~ConfirmDialog() {
-			this.windowStyle = null;
-			this.labelStyle = null;
-
-			if (this.OnConfirm != null) {
-				foreach (var action in this.OnConfirm.GetInvocationList()) {
-					this.OnConfirm -= (Action)action;
-				}
-			}
-
-			if (this.OnCancel != null) {
-				foreach (var action in this.OnCancel.GetInvocationList()) {
-					this.OnCancel -= (Action)action;
-				}
-			}
-		}
-
-		public void Show() {
-			if (this.isVisible == true) {
-				return;
-			}
 
 			InputLockManager.SetControlLock(LOCK_ID);
 			RenderingManager.AddToPostDrawQueue(144, OnDraw);
-			this.isVisible = true;
 		}
 
-		public void Hide() {
-			if (this.isVisible == false) {
-				return;
-			}
-
+		private void Dispose() {
 			InputLockManager.RemoveControlLock(LOCK_ID);
 			RenderingManager.RemoveFromPostDrawQueue(144, OnDraw);
-			this.isVisible = false;
 		}
 
 		private void OnDraw() {
@@ -75,21 +50,21 @@
 			GUILayout.BeginVertical();
 			{
 				GUILayout.Space(10);
-				GUILayout.Label(this.Message, this.labelStyle, GUILayout.ExpandWidth(true));
+				GUILayout.Label(this.message, this.labelStyle, GUILayout.ExpandWidth(true));
 				GUILayout.Space(10);
 				GUILayout.BeginHorizontal();
 				{
-					if (GUILayout.Button("YES", GUILayout.ExpandWidth(true))) {
-						if (this.OnConfirm != null) {
-							this.OnConfirm();
+					if (GUILayout.Button("OK", GUILayout.ExpandWidth(true))) {
+						if (this.onSuccess != null) {
+							this.onSuccess();
 						}
-						this.Hide();
+						this.Dispose();
 					}
 					if (GUILayout.Button("NO", GUILayout.ExpandWidth(true))) {
-						if (this.OnCancel != null) {
-							this.OnCancel();
+						if (this.onCancel != null) {
+							this.onCancel();
 						}
-						this.Hide();
+						this.Dispose();
 					}
 				}
 				GUILayout.EndHorizontal();

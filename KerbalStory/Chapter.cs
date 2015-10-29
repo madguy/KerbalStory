@@ -98,12 +98,5 @@
 		public override Int32 GetHashCode() {
 			return this.Id.GetHashCode();
 		}
-
-		public StoryDialog CreateDialog() {
-			return new StoryDialog() {
-				InstructorName = this.Instructor,
-				Message = this.Story,
-			};
-		}
 	}
 }

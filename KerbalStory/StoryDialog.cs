@@ -6,32 +6,10 @@
 		public static readonly String LOCK_ID = "9382013920";
 		private static readonly Int32 WINDOW_ID = 280391;
 
-		public String Title { get; set; }
-
-		public String Message { get; set; }
+		private String message;
 
 		private KerbalInstructor instructor;
-
-		public KerbalInstructor Instructor {
-			get {
-				return this.instructor;
-			}
-			set {
-				this.instructor = value;
-				if (value == null) {
-					return;
-				}
-
-				this.instructorTexture = new RenderTexture(this.instructorPortraitSize, this.instructorPortraitSize, 8);
-				this.instructor.instructorCamera.targetTexture = this.instructorTexture;
-				this.instructor.instructorCamera.ResetAspect();
-			}
-		}
-
-		public String InstructorName { get; set; }
-
-		public event Action OnClick;
-
+		private String instructorName;
 		private Int32 instructorPortraitSize = 128;
 		private Int32 textureBorderRadius = 124;
 		private Rect instructorRect;
@@ -42,9 +20,18 @@
 		private GUIStyle scrollStyle;
 
 		private Vector2 scrollPos = Vector2.zero;
-		private Boolean isVisible = false;
 
-		public StoryDialog() {
+		private Action callback;
+
+		public static void ShowDialog(String instructorName, String message, Action callback) {
+			new StoryDialog() {
+				instructorName = instructorName,
+				message = message,
+				callback = callback,
+			};
+		}
+
+		private StoryDialog() {
 			var windowWidth = Math.Max(600, Screen.width / 2);
 			var windowHeight = Math.Max(500, Screen.height / 2);
 			this.windowPosition = new Rect((Screen.width / 2) - (windowWidth / 2), (Screen.height / 2) - (windowHeight / 2), windowWidth, windowHeight);
@@ -53,37 +40,23 @@
 				alignment = TextAnchor.MiddleCenter,
 			};
 			this.scrollStyle = new GUIStyle(HighLogic.Skin.scrollView);
-			this.Instructor = Instructors.Wernher;
-		}
-
-		~StoryDialog() {
-			this.labelStyle = null;
-			this.scrollStyle = null;
-			this.instructor = null;
-		}
-
-		public void Show() {
-			if (this.isVisible == true) {
-				return;
-			}
+			this.instructor = Instructors.Wernher;
+			this.instructorTexture = new RenderTexture(this.instructorPortraitSize, this.instructorPortraitSize, 8);
+			this.instructor.instructorCamera.targetTexture = this.instructorTexture;
+			this.instructor.instructorCamera.ResetAspect();
 
 			InputLockManager.SetControlLock(LOCK_ID);
-			RenderingManager.AddToPostDrawQueue(144, OnDraw);
-			this.isVisible = true;
+			RenderingManager.AddToPostDrawQueue(144, this.OnDraw);
 		}
 
-		public void Hide() {
-			if (this.isVisible == false) {
-				return;
-			}
-
+		private void Dispose() {
 			InputLockManager.RemoveControlLock(LOCK_ID);
-			RenderingManager.RemoveFromPostDrawQueue(144, OnDraw);
-			this.isVisible = false;
+			RenderingManager.RemoveFromPostDrawQueue(144, this.OnDraw);
+			UnityEngine.Object.Destroy(this.instructor.gameObject);
 		}
 
 		private void OnDraw() {
-			this.windowPosition = KSPUtil.ClampRectToScreen(GUILayout.Window(WINDOW_ID, this.windowPosition, this.OnWindowDraw, this.Title));
+			this.windowPosition = KSPUtil.ClampRectToScreen(GUILayout.Window(WINDOW_ID, this.windowPosition, this.OnWindowDraw, String.Empty));
 		}
 
 		private void OnWindowDraw(Int32 windowId) {
@@ -96,10 +69,10 @@
 					if (Event.current.type == EventType.Repaint) {
 						var rect = GUILayoutUtility.GetLastRect();
 						this.instructorRect = new Rect(rect.x + 1f, rect.y + 1f, rect.width - 2f, rect.height - 2f);
-						Graphics.DrawTexture(this.instructorRect, this.instructorTexture, new Rect(0f, 0f, 1f, 1f), this.textureBorderRadius, this.textureBorderRadius, this.textureBorderRadius, this.textureBorderRadius, Color.white, this.Instructor.PortraitRenderMaterial);
+						Graphics.DrawTexture(this.instructorRect, this.instructorTexture, new Rect(0f, 0f, 1f, 1f), this.textureBorderRadius, this.textureBorderRadius, this.textureBorderRadius, this.textureBorderRadius, Color.white, this.instructor.PortraitRenderMaterial);
 					}
 
-					var instructorName = this.InstructorName ?? this.Instructor.CharacterName;
+					var instructorName = this.instructorName ?? this.instructor.CharacterName;
 					GUILayout.Label(instructorName, this.labelStyle, GUILayout.Width(charaRectSize));
 				}
 				GUILayout.EndVertical();
@@ -108,14 +81,14 @@
 				{
 					this.scrollPos = GUILayout.BeginScrollView(this.scrollPos, this.scrollStyle);
 					{
-						GUILayout.Label(this.Message);
+						GUILayout.Label(this.message);
 					}
 					GUILayout.EndScrollView();
 					if (GUILayout.Button("OK", GUILayout.ExpandWidth(true))) {
-						if (this.OnClick != null) {
-							this.OnClick();
+						if (this.callback != null) {
+							this.callback();
 						}
-						this.Hide();
+						this.Dispose();
 					}
 				}
 				GUILayout.EndVertical();
