@@ -53,10 +53,15 @@
 		/// </summary>
 		/// <returns></returns>
 		private IEnumerator WaitScenarioInitialize() {
+			var count = 0;
 			while (true) {
 				if (KerbalStoryScenario.Instance != null) {
 					break;
 				}
+				if (count > 100) {
+					break;
+				}
+				count += 1;
 				yield return 0;
 			}
 		}
@@ -79,6 +84,8 @@
 
 				var funding = Funding.Instance;
 				funding.AddFunds((-1 * funding.Funds), TransactionReasons.None);
+
+				ResearchAndDevelopment.Instance.AddScience(50, TransactionReasons.None);
 			}, () => {
 				scenario.Initialized = true;
 				scenario.Enabled = false;

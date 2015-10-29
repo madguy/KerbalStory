@@ -7,8 +7,6 @@
 
 		public static KerbalStoryScenario Instance;
 
-		public Boolean IsLoaded { get; set; }
-
 		[KSPField(isPersistant = true)]
 		private Boolean initialized;
 
@@ -43,11 +41,6 @@
 
 		public override void OnAwake() {
 			Instance = this;
-		}
-
-		public override void OnLoad(ConfigNode node) {
-			base.OnLoad(node);
-			this.IsLoaded = true;
 		}
 	}
 
