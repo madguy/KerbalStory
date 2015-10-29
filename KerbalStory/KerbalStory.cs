@@ -53,15 +53,10 @@
 		/// </summary>
 		/// <returns></returns>
 		private IEnumerator WaitScenarioInitialize() {
-			var count = 0;
-			while (true) {
+			for (var i = 0; i < 100; i++) {
 				if (KerbalStoryScenario.Instance != null) {
 					break;
 				}
-				if (count > 100) {
-					break;
-				}
-				count += 1;
 				yield return 0;
 			}
 		}
