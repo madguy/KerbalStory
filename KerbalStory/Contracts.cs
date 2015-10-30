@@ -104,7 +104,7 @@
 		/// オファー時のイベント
 		/// </summary>
 		protected override void OnOffered() {
-			StoryDialog.ShowDialog(this.Chapter.Instructor, this.Chapter.Story, () => {
+			StoryDialog.ShowDialog(this.Chapter.InstractorType, this.Chapter.InstructorName, this.Chapter.Story, () => {
 				this.Accept();
 			});
 		}

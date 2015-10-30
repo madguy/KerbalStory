@@ -3,7 +3,7 @@
 	using UnityEngine;
 
 	internal class ConfirmDialog {
-		public static readonly String LOCK_ID = "4901858818";
+		private static readonly String LOCK_ID = "4901858818";
 		private static readonly Int32 WINDOW_ID = 714199;
 
 		private String title = "確認";

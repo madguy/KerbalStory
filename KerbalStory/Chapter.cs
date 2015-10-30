@@ -25,9 +25,14 @@
 		public String Title { get; private set; }
 
 		/// <summary>
-		/// インストラクター
+		/// インストラクター名
 		/// </summary>
-		public String Instructor { get; private set; }
+		public String InstructorName { get; private set; }
+
+		/// <summary>
+		/// インストラクタータイプ
+		/// </summary>
+		public String InstractorType { get; private set; }
 
 		/// <summary>
 		/// ストーリーメッセージ
@@ -69,7 +74,10 @@
 		public Chapter(ConfigNode configNode) {
 			this.Id = configNode.GetValue("id");
 
-			this.Instructor = configNode.GetValue("instructor");
+			var instructor = configNode.GetNode("INSTRACTOR");
+			this.InstructorName = instructor.GetValue("name");
+			this.InstractorType = instructor.GetValue("type");
+
 			this.Title = configNode.GetValue("title");
 			this.Story = configNode.GetValue("story").Replace("\\n", "\n");
 

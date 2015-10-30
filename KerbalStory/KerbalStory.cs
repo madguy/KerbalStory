@@ -77,10 +77,14 @@
 				scenario.Chapter = this.chapterIds[0];
 				scenario.State = StoryState.Introduction;
 
+				var configNode = GameDatabase.Instance.GetConfigNodes("KERBALSTORY").First();
+				Debug.Log(configNode);
+
 				var funding = Funding.Instance;
 				funding.AddFunds((-1 * funding.Funds), TransactionReasons.None);
+				funding.AddFunds(Int32.Parse(configNode.GetValue("startFunds")), TransactionReasons.None);
 
-				ResearchAndDevelopment.Instance.AddScience(50, TransactionReasons.None);
+				ResearchAndDevelopment.Instance.AddScience(Int32.Parse(configNode.GetValue("startScience")), TransactionReasons.None);
 			}, () => {
 				scenario.Initialized = true;
 				scenario.Enabled = false;
@@ -156,7 +160,7 @@
 			}
 
 			var chapter = Chapter.GetInstance(currentContract.Chapter.Id);
-			StoryDialog.ShowDialog(chapter.Instructor, chapter.Story, () => {
+			StoryDialog.ShowDialog(chapter.InstractorType, chapter.InstructorName, chapter.Story, () => {
 				luncherButton.SetFalse();
 			});
 		}

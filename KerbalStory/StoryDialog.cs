@@ -3,7 +3,7 @@
 	using UnityEngine;
 
 	internal class StoryDialog {
-		public static readonly String LOCK_ID = "9382013920";
+		private static readonly String LOCK_ID = "9382013920";
 		private static readonly Int32 WINDOW_ID = 280391;
 
 		private String message;
@@ -23,15 +23,16 @@
 
 		private Action callback;
 
-		public static void ShowDialog(String instructorName, String message, Action callback) {
-			new StoryDialog() {
-				instructorName = instructorName,
-				message = message,
-				callback = callback,
-			};
+		public static void ShowDialog(String instructorTypeText, String instructorName, String message, Action callback) {
+			var instructorType = instructorTypeText.ToEnum<InstructorType>();
+			new StoryDialog(instructorType, instructorName, message, callback);
 		}
 
-		private StoryDialog() {
+		private StoryDialog(InstructorType instractorType, String instructorName, String message, Action callback) {
+			this.instructorName = instructorName;
+			this.message = message;
+			this.callback = callback;
+
 			var windowWidth = Math.Max(600, Screen.width / 2);
 			var windowHeight = Math.Max(500, Screen.height / 2);
 			this.windowPosition = new Rect((Screen.width / 2) - (windowWidth / 2), (Screen.height / 2) - (windowHeight / 2), windowWidth, windowHeight);
@@ -40,7 +41,7 @@
 				alignment = TextAnchor.MiddleCenter,
 			};
 			this.scrollStyle = new GUIStyle(HighLogic.Skin.scrollView);
-			this.instructor = Instructors.Wernher;
+			this.instructor = this.GetInstructor(instractorType);
 			this.instructorTexture = new RenderTexture(this.instructorPortraitSize, this.instructorPortraitSize, 8);
 			this.instructor.instructorCamera.targetTexture = this.instructorTexture;
 			this.instructor.instructorCamera.ResetAspect();
@@ -97,14 +98,14 @@
 			GUI.DragWindow();
 		}
 
-		public class Instructors {
-			public static KerbalInstructor Gene { get { return GetInstructor("Instructor_Gene"); } }
-			public static KerbalInstructor Wernher { get { return GetInstructor("Instructor_Wernher"); } }
+		public KerbalInstructor GetInstructor(InstructorType type) {
+			var name = String.Format("Instructor_{0}", type.ToString());
+			var gameObject = (GameObject)UnityEngine.Object.Instantiate(AssetBase.GetPrefab(name));
+			return gameObject.GetComponent<KerbalInstructor>();
+		}
 
-			private static KerbalInstructor GetInstructor(String name) {
-				var gameObject = (GameObject)UnityEngine.Object.Instantiate(AssetBase.GetPrefab(name));
-				return gameObject.GetComponent<KerbalInstructor>();
-			}
+		public enum InstructorType {
+			Gene, Wernher,
 		}
 	}
 }
