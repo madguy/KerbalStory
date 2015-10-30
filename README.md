@@ -5,6 +5,11 @@ Kerbal Space Program(KSP)にちょっとしたストーリーを追加するMOD�
 
 キャリアモードで新規プレイを開始した際に有効にできます。
 
+Install
+-------
+以下からファイルをダウンロードして、解凍したフォルダをKSPのGameData内に配置してください。
+<https://github.com/madguy/KerbalStory/releases>
+
 License
 -------
 
